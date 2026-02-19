@@ -30,3 +30,6 @@ build/
 # Temporary files
 tmp/
 temp/
+PLAN.md
+backend/seed_benchmarks.py
+backend/seed_data.py

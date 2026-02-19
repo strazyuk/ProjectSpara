@@ -18,12 +18,17 @@ export default function BargainList() {
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
 
-    const fetchBargains = async () => {
+    const fetchBargains = async (forceRefresh = false) => {
         if (!session?.access_token) return;
 
         setLoading(true);
         try {
-            const response = await fetch(`${API_URL}/api/bargains/`, {
+            // Add ?refresh=true query param if forcing refresh
+            const url = forceRefresh
+                ? `${API_URL}/api/bargains/?refresh=true`
+                : `${API_URL}/api/bargains/`;
+
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`
                 }
@@ -32,6 +37,9 @@ export default function BargainList() {
             if (response.ok) {
                 const result = await response.json();
                 setBargains(result.data || []);
+                if (result.source === 'cache_fresh_hit') {
+                    console.log("Data was fresh, API call saved.");
+                }
             }
         } catch (error) {
             console.error("Error fetching bargains:", error);
@@ -43,7 +51,7 @@ export default function BargainList() {
 
     useEffect(() => {
         if (session) {
-            fetchBargains();
+            fetchBargains(false); // Load cache only
         }
     }, [session]);
 
@@ -63,7 +71,7 @@ export default function BargainList() {
                 </div>
 
                 <button
-                    onClick={fetchBargains}
+                    onClick={() => fetchBargains(true)}
                     disabled={loading}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
                 >

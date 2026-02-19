@@ -22,29 +22,21 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 def seed_transactions(user_id):
     print(f"Seeding data for user: {user_id}")
     
-    # 1. Netflix (Monthly, $15.49)
-    # 2. Spotify (Monthly, $10.99)
-    # 3. AWS (Monthly, Variable but similar)
-    # 4. Random Coffee (Irregular)
+    # TEST CASES FOR TIMELINE FILTERING:
+    # 1. Netflix: Recent Only (Started 5 months ago) -> Should appear in 6M & All Time
+    # 2. Gym ABC: Historic Only (Cancelled 7 months ago) -> Should ONLY appear in All Time, NOT 6M
+    # 3. AWS: Continuous (Active for 2 years) -> Should appear in both
     
     today = datetime.now()
     transactions = []
     
     # Generate 24 months of data (2 Years)
     for i in range(24):
+        # Approximate 30 days per month
         date = (today - timedelta(days=30 * i)).date().isoformat()
         
-        # Simulate different spending phases
-        # Phase 1: Recent (0-6 months) - High spending
-        # Phase 2: Mid (6-12 months) - Moderate spending
-        # Phase 3: Old (12+ months) - Lower spending
-        multiplier = 1.0
-        if i > 6: multiplier = 0.9
-        if i > 12: multiplier = 0.8
-
-        
-        # Subscription 1: Netflix (Started 1 year ago)
-        if i < 12:
+        # 1. Netflix - NEW Subscription (Only last 5 months, i < 6)
+        if i < 6:
             transactions.append({
                 "user_id": user_id,
                 "teller_transaction_id": f"seed_netflix_{i}",
@@ -57,24 +49,25 @@ def seed_transactions(user_id):
                 "raw_json": {"source": "seed_script"}
             })
         
-        # Subscription 2: Spotify Family (Cancelled 6 months ago)
-        # Only add if we are looking at history older than 6 months (i >= 6)
+        # 2. Gym ABC - OLD Subscription (Cancelled 6 months ago, i >= 6)
+        # This checks if the Filter correctly excludes these for "6 Months" view
         if i >= 6:
             transactions.append({
                 "user_id": user_id,
-                "teller_transaction_id": f"seed_spotify_{i}",
+                "teller_transaction_id": f"seed_gym_{i}",
                 "account_id": "seed_acc_1",
-                "name": "Spotify Family",
-                "merchant_name": "Spotify",
-                "amount": 16.99,
+                "name": "Gym ABC",
+                "merchant_name": "Gym ABC",
+                "amount": 49.99,
                 "date": date,
-                "category": "Entertainment",
+                "category": "Health",
                 "raw_json": {"source": "seed_script"}
             })
 
-        # Subscription 3: AWS (Variable amount)
+        # 3. AWS - CONTINUOUS Subscription (All 24 months)
+        # Variable amount to show trends
         base_aws = 35.00
-        variation = (i % 3) * 1.5 
+        variation = (i % 3) * 5.0 
         transactions.append({
             "user_id": user_id,
             "teller_transaction_id": f"seed_aws_{i}",
@@ -87,110 +80,17 @@ def seed_transactions(user_id):
             "raw_json": {"source": "seed_script"}
         })
         
-        # New Case: Hulu No Ads (Bargain opportunity -> With Ads)
-        transactions.append({
-            "user_id": user_id,
-            "teller_transaction_id": f"seed_hulu_{i}",
-            "account_id": "seed_acc_1",
-            "name": "Hulu No Ads",
-            "merchant_name": "Hulu",
-            "amount": 17.99,
-            "date": date,
-            "category": "Entertainment",
-            "raw_json": {"source": "seed_script"}
-        })
-
-        # New Case: Google One Premium (Bargain opportunity -> Basic)
-        transactions.append({
-            "user_id": user_id,
-            "teller_transaction_id": f"seed_google_{i}",
-            "account_id": "seed_acc_1",
-            "name": "Google One",
-            "merchant_name": "Google",
-            "amount": 9.99,
-            "date": date,
-            "category": "Technology",
-            "raw_json": {"source": "seed_script"}
-        })
-
-        # New Case: Apple.com/bill (Ambiguous - detection test)
-        # $10.99 matches Apple Music Individual
-        transactions.append({
-            "user_id": user_id,
-            "teller_transaction_id": f"seed_apple_{i}",
-            "account_id": "seed_acc_1",
-            "name": "Apple.com/bill",
-            "merchant_name": "Apple",
-            "amount": 10.99,
-            "date": date,
-            "category": "Entertainment",
-            "raw_json": {"source": "seed_script"}
-        })
-
-        # Tricky Case 1: Gym Membership (Name variations)
-        gym_name = "Gym ABC" if i % 2 == 0 else "Gym ABC Inc."
-        transactions.append({
-            "user_id": user_id,
-            "teller_transaction_id": f"seed_gym_{i}",
-            "account_id": "seed_acc_1",
-            "name": gym_name,
-            "merchant_name": "Gym ABC",
-            "amount": 49.99,
-            "date": date,
-            "category": "Health",
-            "raw_json": {"source": "seed_script"}
-        })
-
-        # Tricky Case 2: Adobe Creative Cloud (Currency fluctuation simulation)
-        adobe_amount = 54.99 + (0.01 * (i % 3 - 1))
-        transactions.append({
-            "user_id": user_id,
-            "teller_transaction_id": f"seed_adobe_{i}",
-            "account_id": "seed_acc_1",
-            "name": "Adobe Creative Cloud",
-            "merchant_name": "Adobe",
-            "amount": round(adobe_amount, 2),
-            "date": date,
-            "category": "Software",
-            "raw_json": {"source": "seed_script"}
-        })
-
-        # False Positive Candidate: Uber (Frequent but not periodic subscription)
+        # 4. Spotify - Intermittent (Every other month)
         if i % 2 == 0:
             transactions.append({
                 "user_id": user_id,
-                "teller_transaction_id": f"seed_uber_{i}_a",
+                "teller_transaction_id": f"seed_spotify_{i}",
                 "account_id": "seed_acc_1",
-                "name": "Uber Ride",
-                "merchant_name": "Uber",
-                "amount": 12.50 + (i * 2),
-                "date": (datetime.now() - timedelta(days=30 * i + 5)).date().isoformat(),
-                "category": "Transport",
-                "raw_json": {"source": "seed_script"}
-            })
-            transactions.append({
-                "user_id": user_id,
-                "teller_transaction_id": f"seed_uber_{i}_b",
-                "account_id": "seed_acc_1",
-                "name": "Uber Ride",
-                "merchant_name": "Uber",
-                "amount": 25.00 + (i),
-                "date": (datetime.now() - timedelta(days=30 * i + 15)).date().isoformat(),
-                "category": "Transport",
-                "raw_json": {"source": "seed_script"}
-            })
-
-        # Irregular: Coffee (Local Cafe) - sometimes
-        if i % 2 == 0:
-            transactions.append({
-                "user_id": user_id,
-                "teller_transaction_id": f"seed_coffee_{i}",
-                "account_id": "seed_acc_1",
-                "name": "Joe's Coffee",
-                "merchant_name": "Joes Coffee",
-                "amount": 4.50,
-                "date": (today - timedelta(days=30 * i + 2)).date().isoformat(),
-                "category": "Food & Drink",
+                "name": "Spotify Family",
+                "merchant_name": "Spotify",
+                "amount": 16.99,
+                "date": date,
+                "category": "Entertainment",
                 "raw_json": {"source": "seed_script"}
             })
 

@@ -26,8 +26,6 @@ interface SpendingTrendProps {
 }
 
 export default function SpendingTrend({ transactions, timeRange, onTimeRangeChange }: SpendingTrendProps) {
-    // Internal state removed, using props
-
     const chartData = useMemo(() => {
         if (!transactions.length) return [];
 
@@ -44,10 +42,10 @@ export default function SpendingTrend({ transactions, timeRange, onTimeRangeChan
         }, {} as Record<string, { date: string; amount: number; label: string }>);
 
         return Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
-    }, [transactions]); // removed timeRange dependency as filtering happens in parent now
+    }, [transactions]);
 
     return (
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-full">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-full flex flex-col">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
                     <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
@@ -72,7 +70,7 @@ export default function SpendingTrend({ transactions, timeRange, onTimeRangeChan
                 </div>
             </div>
 
-            <div className="h-[300px] w-full">
+            <div className="flex-1 w-full min-h-[300px]">
                 {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
