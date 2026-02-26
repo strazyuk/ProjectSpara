@@ -12,9 +12,16 @@ app = FastAPI(title="SubscriptCheck API")
 
 # Configure CORS
 origins = [
-    "http://localhost:5173", # Vite default port
+    "http://localhost:5173",   # Local dev (Vite)
     "http://127.0.0.1:5173",
+    "http://localhost:3000",   # Docker (Nginx container)
 ]
+
+# Allow overriding origin via env var for production (e.g. https://yourapp.com)
+cors_origin_env = os.getenv("CORS_ORIGIN")
+if cors_origin_env:
+    origins.append(cors_origin_env)
+
 
 app.add_middleware(
     CORSMiddleware,

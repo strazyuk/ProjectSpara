@@ -85,7 +85,7 @@ export default function CategoryPie({ transactions }: CategoryPieProps) {
                                 ))}
                             </Pie>
                             <Tooltip
-                                formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']}
+                                formatter={(value: number | undefined) => [`$${(value ?? 0).toFixed(2)}`, 'Amount']}
                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                             />
                         </PieChart>

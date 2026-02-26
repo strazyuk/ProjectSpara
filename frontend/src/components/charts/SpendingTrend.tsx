@@ -91,7 +91,7 @@ export default function SpendingTrend({ transactions, timeRange, onTimeRangeChan
                             <Tooltip
                                 cursor={{ fill: '#f1f5f9', opacity: 0.5 }}
                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                formatter={(value: number) => [`$${value.toFixed(2)}`, 'Spending']}
+                                formatter={(value: number | undefined) => [`$${(value ?? 0).toFixed(2)}`, 'Spending']}
                             />
                             <Bar
                                 dataKey="amount"
