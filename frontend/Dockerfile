@@ -19,7 +19,12 @@ RUN npm run build
 # --- Stage 2: Serve ---
 FROM nginx:alpine
 
+# Pass VITE_API_URL to the runtime container so envsubst can use it
+ENV VITE_API_URL=${VITE_API_URL}
+
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the template to a different location
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
