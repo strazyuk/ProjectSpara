@@ -1,15 +1,14 @@
-# SubscriptCheck
+# Spara 
 
 > **AI-Powered Subscription Intelligence — Full-Stack Portfolio Prototype**
 
-SubscriptCheck is a zero-cost, full-stack web application that automatically detects recurring subscriptions from your bank transaction history and surfaces smarter, cheaper alternatives — all powered by a hybrid deterministic + LLM analysis engine.
+Spara is a zero-cost, full-stack web application that automatically detects recurring subscriptions from your bank transaction history and surfaces smarter, cheaper alternatives — all powered by a hybrid deterministic + LLM analysis engine.
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Live Demo Flow](#live-demo-flow)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Features](#features)
@@ -41,17 +40,16 @@ SubscriptCheck demonstrates:
 - **AI-generated cancellation emails** via Groq
 - A **recruiter-friendly demo mode** requiring zero bank connection
 
-This is an engineering showcase project designed to demonstrate full-stack and AI integration competency. It is **not** a production fintech product.
+
 
 ---
 
 ## Live Demo Flow
 
 1. Sign in with Google (via Supabase Auth)
-2. Click **"Run Demo"** to seed synthetic transaction data — no bank connection required
-3. View automatically detected subscriptions (Netflix, Spotify, AWS, etc.)
-4. Review **Bargain Alerts** — cheaper alternatives identified from benchmark data
-5. Generate a polished **cancellation email** with one click
+2. View automatically detected subscriptions (Netflix, Spotify, AWS, etc.)
+3. Review **Bargain Alerts** — cheaper alternatives identified from benchmark data
+4. Generate a polished **cancellation email** with one click
 
 > Total interaction time: ~60 seconds.
 
@@ -166,12 +164,7 @@ A two-stage hybrid pipeline:
 - Personalized with subscription name and user's first name
 - Optional Resend integration for live email delivery demo
 
-### 🎭 Demo Mode (Recruiter-Friendly)
-- Single button seeds the entire database with realistic synthetic data
-- No Teller connection required
-- Immediately showcases the full detection and bargain pipeline
 
----
 
 ## Project Structure
 
