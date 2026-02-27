@@ -81,7 +81,7 @@ def find_bargains(user_id: str, supabase: Client) -> List[Dict]:
             "user_id": user_id,
             "data": bargains,
             "last_checked_at": datetime.now().isoformat(),
-            "is_rate_limited": False
+            "is_rate_limited": False # Assuming we made it here without hard failing
         }).execute()
     except Exception as e:
         print(f"Failed to update cache: {e}")
@@ -158,4 +158,7 @@ def _analyze_bargain_opportunity(sub: Dict, benchmarks: List[Dict]) -> Optional[
         
     except Exception as e:
         print(f"Error analyzing bargain for {sub['name']}: {e}")
+        # If rate limited, we should probably raise so the caller knows
+        if "rate_limit_exceeded" in str(e):
+             raise Exception("Groq API rate limit exceeded")
         return None
