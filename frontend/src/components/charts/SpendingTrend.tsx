@@ -4,12 +4,10 @@ import {
     Bar,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
     Cell
 } from 'recharts';
-import { Calendar } from 'lucide-react';
 import type { TimeRange } from '../../types';
 
 interface Transaction {
@@ -45,26 +43,24 @@ export default function SpendingTrend({ transactions, timeRange, onTimeRangeChan
     }, [transactions]);
 
     return (
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-full flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <Calendar size={20} />
-                    </div>
-                    <h3 className="font-semibold text-slate-800">Spending Trend</h3>
+        <div className="bg-white p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50 h-full flex flex-col">
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h3 className="text-xl font-bold text-black tracking-tight">Dynamics</h3>
+                    <p className="text-xs font-medium text-gray-400 mt-0.5 uppercase tracking-widest">Spending Trend</p>
                 </div>
 
-                <div className="flex bg-slate-100 rounded-lg p-1 text-xs font-medium">
+                <div className="flex bg-gray-50 rounded-full p-1 text-[10px] font-bold uppercase tracking-wider">
                     {(['6M', '1Y', 'ALL'] as TimeRange[]).map((range) => (
                         <button
                             key={range}
                             onClick={() => onTimeRangeChange(range)}
-                            className={`px-3 py-1.5 rounded-md transition-all ${timeRange === range
-                                ? 'bg-white text-slate-900 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700'
+                            className={`px-4 py-1.5 rounded-full transition-all ${timeRange === range
+                                ? 'bg-white text-black shadow-sm'
+                                : 'text-gray-400 hover:text-gray-600'
                                 }`}
                         >
-                            {range === '6M' ? '6 Months' : range === '1Y' ? '1 Year' : 'All Time'}
+                            {range}
                         </button>
                     ))}
                 </div>
@@ -74,40 +70,51 @@ export default function SpendingTrend({ transactions, timeRange, onTimeRangeChan
                 {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                             <XAxis
                                 dataKey="label"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: '#64748b', fontSize: 12 }}
+                                tick={{ fill: '#9ca3af', fontSize: 10, fontWeight: 600 }}
                                 dy={10}
                             />
                             <YAxis
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: '#64748b', fontSize: 12 }}
+                                tick={{ fill: '#9ca3af', fontSize: 10, fontWeight: 600 }}
                                 tickFormatter={(value) => `$${value}`}
                             />
                             <Tooltip
-                                cursor={{ fill: '#f1f5f9', opacity: 0.5 }}
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                formatter={(value: number | undefined) => [`$${(value ?? 0).toFixed(2)}`, 'Spending']}
+                                cursor={{ fill: '#f9fafb', radius: 4 }}
+                                contentStyle={{
+                                    borderRadius: '16px',
+                                    border: 'none',
+                                    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                                    padding: '12px 16px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                }}
+                                itemStyle={{ color: '#000' }}
+                                labelStyle={{ color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}
+                                formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, 'Spending']}
                             />
                             <Bar
                                 dataKey="amount"
-                                radius={[6, 6, 0, 0]}
-                                maxBarSize={60}
-                                activeBar={{ fill: '#4f46e5' }}
+                                radius={[4, 4, 4, 4]}
+                                maxBarSize={8}
+                                activeBar={{ fill: '#000' }}
                             >
                                 {chartData.map((_entry, index) => (
-                                    <Cell key={`cell-${index}`} fill="#6366f1" fillOpacity={0.8} />
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={index === chartData.length - 1 ? "#000" : "#e5e7eb"}
+                                    />
                                 ))}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                        No transaction data available for this period
+                    <div className="h-full flex items-center justify-center text-gray-400 text-sm font-medium italic">
+                        No transaction data available
                     </div>
                 )}
             </div>

@@ -77,7 +77,7 @@ function Dashboard() {
   const monthlyAverage = totalSpend / (transactions.length > 0 ? 6 : 1);
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
+    <div className="flex h-screen bg-brand-offwhite text-black font-sans overflow-hidden">
       <Sidebar
         userEmail={user?.email}
         onSignOut={signOut}
@@ -87,32 +87,32 @@ function Dashboard() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <div className="lg:hidden bg-white border-b border-slate-200 p-4 flex justify-between items-center">
-          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <div className="lg:hidden bg-white border-b border-gray-100 p-4 flex justify-between items-center">
+          <h1 className="text-sm font-bold tracking-widest uppercase">
             Spara
           </h1>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-auto p-4 lg:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex-1 overflow-auto p-4 lg:p-10">
+          <div className="max-w-7xl mx-auto space-y-10">
 
             {/* Page Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-end">
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">
-                  {activeTab === 'dashboard' ? 'Dashboard Overview' : 'All Transactions'}
-                </h1>
-                <p className="text-slate-500">
-                  {activeTab === 'dashboard' ? "Welcome back, here's your financial summary." : 'Full history from connected accounts.'}
+                <p className="text-sm font-medium text-gray-400 mb-1">
+                  Good morning, {user?.email?.split('@')[0]}
                 </p>
+                <h1 className="text-3xl font-bold tracking-tight text-black">
+                  {activeTab === 'dashboard' ? 'My balance' : 'Transactions'}
+                </h1>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <TellerConnect onSuccess={handleTellerSuccess} />
                 <button
                   onClick={fetchTransactions}
                   disabled={loading}
-                  className="p-2 bg-white border border-slate-200 text-slate-500 rounded-lg hover:text-blue-600 hover:border-blue-200 transition-all disabled:animate-spin shadow-sm"
+                  className="p-2.5 bg-white text-gray-400 rounded-full hover:text-black hover:bg-gray-50 transition-all disabled:animate-spin shadow-sm border border-gray-100"
                   title="Refresh Data"
                 >
                   <RefreshCw size={20} />
@@ -124,27 +124,33 @@ function Dashboard() {
             {activeTab === 'dashboard' && (
               <>
                 {/* KPI Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-start justify-between">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="bg-white p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50 flex flex-col justify-between h-40">
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Total Spend (All Time)</p>
-                      <h3 className="text-2xl font-bold text-slate-900 mt-1">${totalSpend.toFixed(2)}</h3>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Spend</p>
+                      <h3 className="text-3xl font-bold text-black mt-2 tracking-tight">${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                     </div>
-                    <div className="p-3 bg-blue-50 text-blue-600 rounded-lg"><DollarSign size={24} /></div>
+                    <div className="flex items-center gap-2">
+                      <span className="bg-black text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <TrendingUp size={10} /> +12.5%
+                      </span>
+                    </div>
                   </div>
-                  <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-start justify-between">
+
+                  <div className="bg-white p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50 flex flex-col justify-between h-40">
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Transactions</p>
-                      <h3 className="text-2xl font-bold text-slate-900 mt-1">{transactions.length}</h3>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Activity</p>
+                      <h3 className="text-3xl font-bold text-black mt-2 tracking-tight">{transactions.length} <span className="text-sm font-medium text-gray-400">txns</span></h3>
                     </div>
-                    <div className="p-3 bg-purple-50 text-purple-600 rounded-lg"><Activity size={24} /></div>
+                    <div className="p-2 bg-gray-50 text-gray-400 rounded-lg w-fit"><Activity size={18} /></div>
                   </div>
-                  <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-start justify-between">
+
+                  <div className="bg-white p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50 flex flex-col justify-between h-40">
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Est. Monthly Avg</p>
-                      <h3 className="text-2xl font-bold text-slate-900 mt-1">${monthlyAverage.toFixed(0)}</h3>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Monthly Avg</p>
+                      <h3 className="text-3xl font-bold text-black mt-2 tracking-tight">${monthlyAverage.toFixed(0)}</h3>
                     </div>
-                    <div className="p-3 bg-green-50 text-green-600 rounded-lg"><TrendingUp size={24} /></div>
+                    <div className="p-2 bg-gray-50 text-gray-400 rounded-lg w-fit"><DollarSign size={18} /></div>
                   </div>
                 </div>
 
@@ -172,47 +178,47 @@ function Dashboard() {
 
             {/* ===================== TRANSACTIONS TAB ===================== */}
             {activeTab === 'transactions' && (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div className="bg-white p-10 rounded-[40px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50">
+                <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900">All Transactions</h2>
-                    <p className="text-sm text-slate-500">Full history from connected accounts</p>
+                    <h2 className="text-2xl font-bold text-black tracking-tight">Financial History</h2>
+                    <p className="text-xs font-medium text-gray-400 mt-1 uppercase tracking-widest">Full history from connected accounts</p>
                   </div>
-                  <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold border border-slate-200">
+                  <span className="bg-black text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
                     {transactions.length} Records
                   </span>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-slate-100">
-                    <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                  <table className="w-full text-left">
+                    <thead className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left tracking-wider">Name</th>
-                        <th className="px-6 py-3 text-left tracking-wider">Category</th>
-                        <th className="px-6 py-3 text-right tracking-wider">Amount</th>
+                        <th className="px-6 py-4">Date</th>
+                        <th className="px-6 py-4">Name</th>
+                        <th className="px-6 py-4">Category</th>
+                        <th className="px-6 py-4 text-right">Amount</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white text-sm">
+                    <tbody className="divide-y divide-gray-50">
                       {transactions.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className="px-6 py-12 text-center text-slate-500 italic">
+                          <td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-medium italic">
                             No transactions found. Connect a bank account to get started.
                           </td>
                         </tr>
                       ) : (
                         transactions.map((t) => (
-                          <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap text-slate-500 font-mono text-xs">
-                              {new Date(t.date).toLocaleDateString()}
+                          <tr key={t.id} className="hover:bg-gray-50/50 transition-colors group">
+                            <td className="px-6 py-6 text-[10px] text-gray-400 font-bold uppercase tracking-widest tabular-nums">
+                              {new Date(t.date).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit', year: 'numeric' })}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">{t.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                            <td className="px-6 py-6 font-bold text-black">{t.name}</td>
+                            <td className="px-6 py-6">
+                              <span className="inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold bg-gray-50 text-gray-500 uppercase tracking-widest border border-gray-100">
                                 {t.category}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-slate-900 text-right font-mono font-medium">
+                            <td className="px-6 py-6 text-right font-bold text-black tabular-nums">
                               ${t.amount.toFixed(2)}
                             </td>
                           </tr>

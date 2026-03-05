@@ -63,29 +63,29 @@ export default function SubscriptionList() {
     }, [session]);
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+        <div className="bg-white p-10 rounded-[40px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50 h-full flex flex-col">
+            <div className="flex justify-between items-center mb-10">
                 <div>
-                    <h2 className="text-lg font-semibold text-slate-900">Active Subscriptions</h2>
-                    <p className="text-sm text-slate-500">AI-detected recurring payments</p>
+                    <h2 className="text-2xl font-bold text-black tracking-tight">Active Plan</h2>
+                    <p className="text-xs font-medium text-gray-400 mt-1 uppercase tracking-widest">AI-detected recurring payments</p>
                 </div>
                 <button
                     onClick={handleDetect}
                     disabled={detecting}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 font-medium text-sm"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-50 text-black rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 font-bold text-[10px] uppercase tracking-widest border border-gray-100"
                 >
                     {detecting ? (
-                        <RefreshCw className="animate-spin" size={16} />
+                        <RefreshCw className="animate-spin" size={12} />
                     ) : (
-                        <Zap size={16} />
+                        <Zap size={12} />
                     )}
-                    {detecting ? 'Analyzing...' : 'Run AI Detection'}
+                    {detecting ? 'Analyzing...' : 'Refresh Detection'}
                 </button>
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
+                <table className="w-full text-left">
+                    <thead className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50">
                         <tr>
                             <th className="px-6 py-4">Service</th>
                             <th className="px-6 py-4">Category</th>
@@ -93,37 +93,37 @@ export default function SubscriptionList() {
                             <th className="px-6 py-4 text-right">Cost</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-gray-50">
                         {loading ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-8 text-center text-slate-400">
-                                    Loading subscriptions...
+                                <td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-medium italic">
+                                    Syncing subscriptions...
                                 </td>
                             </tr>
                         ) : subscriptions.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-8 text-center text-slate-400 italic">
-                                    No subscriptions detected yet. Try running the AI detection.
+                                <td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-medium italic">
+                                    No subscriptions detected yet.
                                 </td>
                             </tr>
                         ) : (
                             subscriptions.map((sub) => (
-                                <tr key={sub.id} className="hover:bg-slate-50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-slate-900">
-                                        {sub.name}
-                                        <div className="text-xs text-slate-400 font-normal mt-0.5">
-                                            via {sub.merchant_name}
+                                <tr key={sub.id} className="hover:bg-gray-50/50 transition-colors group">
+                                    <td className="px-6 py-6">
+                                        <div className="font-bold text-black">{sub.name}</div>
+                                        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                                            {sub.merchant_name}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                    <td className="px-6 py-6">
+                                        <span className="inline-flex items-center px-4 py-1 rounded-full text-[10px] font-bold bg-gray-50 text-gray-500 uppercase tracking-widest border border-gray-100">
                                             {sub.category}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-500 capitalize">
+                                    <td className="px-6 py-6 text-gray-400 font-bold text-[10px] uppercase tracking-widest">
                                         {sub.frequency}
                                     </td>
-                                    <td className="px-6 py-4 text-right font-mono font-medium text-slate-900">
+                                    <td className="px-6 py-6 text-right font-bold text-black">
                                         ${sub.amount.toFixed(2)}
                                     </td>
                                 </tr>
@@ -134,8 +134,9 @@ export default function SubscriptionList() {
             </div>
 
             {subscriptions.length > 0 && (
-                <div className="p-4 bg-slate-50 border-t border-slate-100 text-right text-sm text-slate-500">
-                    Total Monthly: <span className="font-semibold text-slate-900">${subscriptions.reduce((acc, curr) => acc + curr.amount, 0).toFixed(2)}</span>
+                <div className="mt-8 pt-8 border-t border-gray-100 flex justify-between items-center px-6">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Monthly Exposure</span>
+                    <span className="text-xl font-bold text-black tracking-tight">${subscriptions.reduce((acc, curr) => acc + curr.amount, 0).toFixed(2)}</span>
                 </div>
             )}
         </div>

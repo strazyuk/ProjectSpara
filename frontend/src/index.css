@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+@theme {
+    --font-sans: "Inter", "system-ui", "sans-serif";
+    --color-brand-offwhite: #f7f8f9;
+}
+
+@layer base {
+    body {
+        @apply bg-brand-offwhite text-black antialiased;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+}
+
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
