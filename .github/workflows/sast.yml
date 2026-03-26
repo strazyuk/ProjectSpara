@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["main", "master"]
 
+permissions:
+  security-events: write
+  contents: read
+
 jobs:
   semgrep:
     runs-on: ubuntu-latest
@@ -27,7 +31,7 @@ jobs:
           jq 'del(.runs[].results[] | select((.level == "warning" or .level == "note") and (.properties.precision == "high" or .properties.precision == "medium" or .properties.precision == "very-high")))' results.sarif > filtered_results.sarif
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: filtered_results.sarif
         if: always()

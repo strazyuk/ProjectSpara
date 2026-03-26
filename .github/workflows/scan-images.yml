@@ -4,6 +4,10 @@ on:
   push:
     branches: ["main", "master"]
 
+permissions:
+  security-events: write
+  contents: read
+
 jobs:
   scan:
     runs-on: ubuntu-latest
@@ -47,13 +51,13 @@ jobs:
           summary: true
 
       - name: Upload SARIF (Backend)
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: backend-scout.sarif
           category: backend
 
       - name: Upload SARIF (Frontend)
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: frontend-scout.sarif
           category: frontend
