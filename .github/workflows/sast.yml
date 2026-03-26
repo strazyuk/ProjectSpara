@@ -1,0 +1,33 @@
+name: SAST Scan
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          docker run --rm -v $(pwd):/src returntocorp/semgrep semgrep scan --sarif --output=results.sarif --config=p/default
+
+      - name: Filter Results
+        run: |
+          # Keep: 
+          # - High Severity (error)
+          # - Medium/Low Severity (warning/note) ONLY IF confidence is low
+          # Ignore:
+          # - Medium/Low Severity (warning/note) IF confidence is high or medium
+          jq 'del(.runs[].results[] | select((.level == "warning" or .level == "note") and (.properties.precision == "high" or .properties.precision == "medium" or .properties.precision == "very-high")))' results.sarif > filtered_results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: filtered_results.sarif
+        if: always()
