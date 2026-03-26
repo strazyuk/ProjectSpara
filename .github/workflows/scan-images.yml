@@ -26,13 +26,11 @@ jobs:
         run: |
           docker build -t project-spara-frontend:latest ./frontend
 
-      - name: Authenticate to Docker (Optional)
-        # Required for some Docker Scout features
+      - name: Authenticate to Docker
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-        if: env.DOCKERHUB_USERNAME != ''
 
       - name: Docker Scout Scan (Backend)
         uses: docker/scout-action@v1
