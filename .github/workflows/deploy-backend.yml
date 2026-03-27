@@ -60,6 +60,11 @@ jobs:
               rm -rf awscliv2.zip aws
             fi
 
+            # Install Docker Compose v2 if missing or if only v1 is present
+            if ! docker compose version &> /dev/null 2>&1; then
+              sudo apt-get install -y docker-compose-plugin
+            fi
+
             # Configure AWS credentials for this session
             export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
             export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
@@ -78,7 +83,9 @@ jobs:
             echo "TELLER_KEY_PATH=${{ secrets.TELLER_KEY_PATH }}" >> .env
             echo "ECR_REPOSITORY_URL=${{ steps.login-ecr.outputs.registry }}/projectspara-backend" >> .env
 
-            # Copy latest docker-compose from the checkout (already SCP'd over)
-            # Pull and restart
-            docker-compose pull
-            docker-compose up -d
+            # Stop and remove old containers to avoid ContainerConfig incompatibility (docker-compose v1 bug)
+            docker compose down || true
+
+            # Pull new images and restart (using docker compose v2)
+            docker compose pull
+            docker compose up -d
