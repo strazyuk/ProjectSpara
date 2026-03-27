@@ -35,11 +35,11 @@ app.include_router(teller.router, prefix="/api/teller")
 app.include_router(subscriptions.router, prefix="/api/subscriptions")
 app.include_router(bargains.router, prefix="/api/bargains")
 
-@app.get("/")
+@app.get("/api")
 def read_root():
     return {"message": "Welcome to SubscriptCheck API"}
 
-@app.get("/health")
+@app.get("/api/health")
 def health_check():
     return {"status": "ok"}
 
