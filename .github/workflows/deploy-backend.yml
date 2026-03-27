@@ -66,9 +66,10 @@ jobs:
               rm -rf awscliv2.zip aws
             fi
 
-            # Install Docker Compose v2 if missing or if only v1 is present
-            if ! docker compose version &> /dev/null 2>&1; then
-              sudo apt-get install -y docker-compose-plugin
+            # Install Docker Compose v2 (binary) if missing
+            if ! docker-compose version | grep -q 'v2' &> /dev/null; then
+              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
             fi
 
             # Configure AWS credentials for this session
@@ -90,8 +91,8 @@ jobs:
             echo "ECR_REPOSITORY_URL=${{ steps.login-ecr.outputs.registry }}/projectspara-backend" >> .env
 
             # Stop and remove old containers to avoid ContainerConfig incompatibility (docker-compose v1 bug)
-            docker compose down || true
+            docker-compose down || true
 
-            # Pull new images and restart (using docker compose v2)
-            docker compose pull
-            docker compose up -d
+            # Pull new images and restart (using docker-compose v2 binary)
+            docker-compose pull
+            docker-compose up -d --remove-orphans
