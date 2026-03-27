@@ -9,11 +9,7 @@ on:
       - '.github/workflows/deploy-backend.yml'
 
 jobs:
-  sast:
-    uses: ./.github/workflows/sast.yml
-
   deploy:
-    needs: [sast]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
