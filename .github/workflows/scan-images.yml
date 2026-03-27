@@ -9,7 +9,11 @@ permissions:
   contents: read
 
 jobs:
+  sast:
+    uses: ./.github/workflows/sast.yml
+
   scan:
+    needs: [sast]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
