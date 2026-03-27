@@ -72,6 +72,10 @@ jobs:
             echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env
             echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env
             echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
+            echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> .env
+            echo "TELLER_APP_ID=${{ secrets.TELLER_APP_ID }}" >> .env
+            echo "TELLER_CERT_PATH=${{ secrets.TELLER_CERT_PATH }}" >> .env
+            echo "TELLER_KEY_PATH=${{ secrets.TELLER_KEY_PATH }}" >> .env
             echo "ECR_REPOSITORY_URL=${{ steps.login-ecr.outputs.registry }}/projectspara-backend" >> .env
 
             # Copy latest docker-compose from the checkout (already SCP'd over)
