@@ -7,6 +7,12 @@ load_dotenv()
 
 from auth import verify_token
 from routers import teller, subscriptions, bargains
+from supabase import create_client, Client
+
+# Initialize Supabase client for health checks
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 app = FastAPI(title="SubscriptCheck API")
 
@@ -41,7 +47,14 @@ def read_root():
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok"}
+    try:
+        # Lightweight query to keep Supabase alive
+        supabase.table("market_benchmarks").select("id").limit(1).execute()
+        return {"status": "ok", "supabase": "connected"}
+    except Exception as e:
+        # We still return 200 to avoid failing load balancer checks, 
+        # but report the DB status
+        return {"status": "degraded", "supabase": "disconnected", "error": str(e)}
 
 @app.get("/me")
 def get_current_user(user_payload: dict = Depends(verify_token)):
