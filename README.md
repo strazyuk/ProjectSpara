@@ -27,6 +27,15 @@ graph TD
     end
 ```
 
+### **Detailed Component Interactions**
+
+1.  **Request Routing**: All traffic enters via **CloudFront**.
+    *   **Frontend**: Requests for static assets (HTML/JS/CSS) are served directly from the **S3 Bucket**.
+    *   **Backend**: Requests matching `/api/*` are forwarded to the **EC2 Backend Origin**, where an **Nginx** reverse proxy routes it to the **FastAPI** container.
+2.  **Autonomous Research (KM)**: When the **Bargain Hunter** detects a subscription in a new category, it triggers the **Knowledge Manager**. The KM uses **Groq AI** to research the market and saves fresh competitors/prices into the **Supabase** `market_benchmarks` table.
+3.  **Savings Discovery (BH)**: The **Bargain Hunter** performs a cross-reference between your personal subscriptions and the AI-curated benchmarks in Supabase. It uses LLM logic to determine if a cheaper service is a "valid logical substitute" before presenting it to you.
+4.  **Bank Synchronization (Teller)**: The backend securely communicates with the **Teller API** using mTLS certificates to pull real-time transaction data, which the **Detector** then analyzes to find your recurring payments.
+
 ## 🚀 Key Features
 
 ### 1. Subscription Detector
