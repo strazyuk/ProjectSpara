@@ -1,493 +1,101 @@
-# Spara 
+# ProjectSpara: Financial Intelligence & Savings Analyst
 
-> **AI-Powered Subscription Intelligence — Full-Stack Portfolio Prototype**
+ProjectSpara is an AI-powered financial management platform designed to help users discover hidden subscriptions, research market benchmarks autonomously, and find cost-saving alternatives for their recurring expenses.
 
-Spara is a zero-cost, full-stack web application that automatically detects recurring subscriptions from your bank transaction history and surfaces smarter, cheaper alternatives — all powered by a hybrid deterministic + LLM analysis engine.
+## 🏗️ Technical Architecture
 
----
+### Service Interaction Flow
+The following diagram illustrates how the frontend, backend, and AI components interact across the AWS infrastructure.
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
-  - [Environment Variables](#environment-variables)
-- [API Reference](#api-reference)
-- [AI System Design](#ai-system-design)
-- [Database Schema](#database-schema)
-- [Security](#security)
-- [Deployment](#deployment)
-- [Project Scope & Disclaimer](#project-scope--disclaimer)
-- [Future Roadmap](#future-roadmap)
-
----
-
-## Overview
-
-SubscriptCheck demonstrates:
-
-- Secure **Google OAuth** authentication via Supabase
-- **Third-party financial API integration** (Teller.io — sandbox mode)
-- A **hybrid subscription detection engine** combining rule-based heuristics with **Groq LLM (Llama 3)** classification
-- Structured **LLM JSON output validation**
-- **Bargain Intelligence** — comparing subscriptions against market benchmarks to surface savings
-- **AI-generated cancellation emails** via Groq
-- A **recruiter-friendly demo mode** requiring zero bank connection
-
-
-
----
-
-## Live Demo Flow
-
-1. Sign in with Google (via Supabase Auth)
-2. View automatically detected subscriptions (Netflix, Spotify, AWS, etc.)
-3. Review **Bargain Alerts** — cheaper alternatives identified from benchmark data
-4. Generate a polished **cancellation email** with one click
-
-> Total interaction time: ~60 seconds.
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────┐
-│  Frontend (React + TypeScript + Tailwind)  │
-│  Hosted on Vercel                         │
-└────────────────┬────────────────────┘
-                 │ HTTPS (JWT Bearer Token)
-┌────────────────▼────────────────────┐
-│  FastAPI Backend                    │
-│  Hosted on Render                   │
-│                                     │
-│  ┌──────────────────────────────┐   │
-│  │  Subscription Detection      │   │
-│  │  (Heuristic → LLM pipeline)  │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │  Bargain Hunter              │   │
-│  │  (Benchmark comparison)      │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │  Knowledge Manager           │   │
-│  │  (LLM cancellation emails)   │   │
-│  └──────────────────────────────┘   │
-└──────┬───────────────┬──────────────┘
-       │               │
-┌──────▼───────┐ ┌─────▼──────────────┐
-│  Supabase    │ │  Groq Cloud        │
-│  Postgres DB │ │  Llama 3 Inference │
-│  + Auth      │ └────────────────────┘
-└──────┬───────┘
-       │
-┌──────▼───────────────┐
-│  Teller API          │
-│  (Sandbox banking    │
-│   data ingestion)    │
-└──────────────────────┘
+```mermaid
+graph TD
+    User((User)) -->|HTTPS| CF[CloudFront]
+    CF -->|Default| S3[S3 Frontend Bucket]
+    CF -->|/api/*| EC2[EC2 Backend Proxy]
+    
+    subgraph "AWS Ecosystem"
+        EC2 -->|Docker Proxy| FastAPI[FastAPI App]
+        FastAPI -->|Store/Retrieve| Supabase[(Supabase DB)]
+        FastAPI -->|Analyze| Groq[Groq AI / Llama 3.3]
+        FastAPI -->|Sync| Teller[Teller API]
+    end
+    
+    subgraph "AI Core Logic"
+        FastAPI --> Detector[Subscription Detector]
+        FastAPI --> KM[Knowledge Manager]
+        KM --> BH[Bargain Hunter]
+    end
 ```
 
----
+## 🚀 Key Features
 
-## Tech Stack
+### 1. Subscription Detector
+Uses **Llama 3.3** to analyze bank transaction patterns. It groups similar merchants, filters candidates with recurring dates, and uses AI to normalize names and categories (e.g., identifying "AMZN MKTP" as "Amazon Prime").
 
-| Layer           | Technology               | Provider     | Purpose                          |
-|-----------------|--------------------------|--------------|----------------------------------|
-| Frontend        | React 19 + TypeScript    | Vercel       | UI + Hosting                     |
-| Styling         | Tailwind CSS v4          | -            | Utility-first styling            |
-| Charts          | Recharts                 | -            | Spending visualisations          |
-| Icons           | Lucide React             | -            | UI icons                         |
-| Backend         | FastAPI + Uvicorn        | Render       | REST API server                  |
-| Auth            | Supabase Auth (Google OAuth) | Supabase | Identity management              |
-| Database        | PostgreSQL               | Supabase     | Persistent storage               |
-| AI Inference    | Groq API (Llama 3)       | Groq Cloud   | Subscription classification + email generation |
-| Banking Data    | Teller API               | Teller.io    | Live/sandbox financial data      |
-| Email (Optional)| Resend                   | Resend       | Cancellation email demo          |
+### 2. Autonomous Knowledge Manager
+A background research engine that populates a "Market Benchmark" database. If a user has a subscription in a category that lacks data, the Knowledge Manager autonomously researches competitors and free alternatives across the web.
 
-All services operate within **free-tier constraints**.
+### 3. Bargain Hunter
+Compares your active subscriptions against the AI-populated knowledge base. It provides personalized saving reports, such as suggesting "DaVinci Resolve" as a free alternative to "Adobe Premiere".
 
----
+### 4. Supabase Keep-Alive
+A specialized health-check system that pings the Supabase database during deployments and monitoring checks. This prevents the Supabase free-tier project from pausing due to inactivity.
 
-## Features
+## 🛠️ Tech Stack
 
-### 🔐 Authentication
-- Google OAuth via Supabase with JWT verification on every backend request
-- User profile sync table linked to Supabase Auth
+- **Frontend**: Vite, React, Tailwind CSS, Lucide Icons, Recharts.
+- **Backend**: FastAPI, Uvicorn, Docker, Nginx (Reverse Proxy).
+- **Database**: Supabase (PostgreSQL).
+- **AI/LLM**: Groq SDK (Llama 3.3 70B Versatile).
+- **Infrastructure**: Terraform, AWS (S3, CloudFront, EC2, ECR).
 
-### 🏦 Transaction Ingestion (Teller API)
-- Connect a bank account via **Teller Connect** (sandboxed)
-- Automatic transaction sync and storage in Supabase Postgres
-- Demo mode seeds synthetic transactions — no real bank account required
+## 📦 Deployment Details
 
-### 🤖 Subscription Detection Engine
-A two-stage hybrid pipeline:
+### Infrastructure Setup (Terraform)
+The infrastructure is managed via Terraform in the `terraform/` directory.
 
-**Stage 1 — Deterministic Heuristics**
-- Groups transactions by merchant name
-- Filters for recurring amounts (±10% tolerance)
-- Detects 25–35 day intervals
-- Requires minimum 2 occurrences to flag as candidate
+1. **Initialize & Apply**:
+   ```bash
+   cd terraform
+   terraform init
+   terraform apply
+   ```
+2. **Key Outputs**: Terraform will provide the `ec2_public_ip`, `cloudfront_domain_name`, and `s3_bucket_name`. These are required for the next steps.
 
-**Stage 2 — LLM Validation (Groq / Llama 3)**
-- Sends grouped candidates to Llama 3 for classification
-- Returns strictly validated JSON:
-  ```json
-  {
-    "is_subscription": true,
-    "normalized_name": "Netflix",
-    "category": "Entertainment",
-    "confidence": 0.92
-  }
-  ```
+### Environment Variable Mapping
+Ensure these secrets are configured in your **GitHub Repository Settings > Secrets and variables > Actions**:
 
-### 💡 Bargain Intelligence Engine
-- Compares detected subscriptions against a curated market benchmark table
-- Identifies cheaper tiers or alternatives
-- Returns structured savings recommendations:
-  ```json
-  {
-    "original": "Netflix Standard - $20",
-    "alternative": "Netflix Basic - $12",
-    "monthly_savings": 8
-  }
-  ```
+| Secret Key | Description |
+| :--- | :--- |
+| `AWS_ACCESS_KEY_ID` | AWS Credentials for Terraform and S3 Sync. |
+| `AWS_SECRET_ACCESS_KEY` | AWS Credentials. |
+| `EC2_HOST` | The public IP of your backend instance (output from Terraform). |
+| `EC2_SSH_KEY` | Your private SSH key for deployment access. |
+| `SUPABASE_URL` | Your Supabase project URL. |
+| `SUPABASE_SERVICE_ROLE_KEY` | High-privilege key for backend database operations. |
+| `GROQ_API_KEY` | API key for LLM analysis. |
+| `VITE_API_URL` | Should point to your CloudFront domain (e.g., `https://dxxxxx.cloudfront.net`). |
 
-### ✉️ AI Cancellation Email Generator
-- Generates polite, professional cancellation emails using Groq
-- Personalized with subscription name and user's first name
-- Optional Resend integration for live email delivery demo
-
-
-
-## Project Structure
-
-```
-ProjectSpara/
-├── backend/
-│   ├── main.py                    # FastAPI app entry point, CORS config, router registration
-│   ├── auth.py                    # JWT verification middleware
-│   ├── requirements.txt           # Python dependencies
-│   ├── routers/
-│   │   ├── teller.py              # POST /api/teller/sync — token exchange & transaction fetch
-│   │   ├── subscriptions.py       # POST /api/subscriptions/detect, GET /api/subscriptions
-│   │   └── bargains.py            # Bargain alert endpoints
-│   ├── services/
-│   │   ├── detector.py            # Hybrid subscription detection (heuristic + LLM)
-│   │   ├── bargain_hunter.py      # Market benchmark comparison logic
-│   │   └── knowledge_manager.py   # Cancellation email generation via Groq
-│   ├── db/
-│   │   ├── schema_subscriptions.sql   # Subscriptions table schema
-│   │   └── schema_benchmarks.sql      # Market benchmarks table schema
-│   ├── seed_data.py               # Seed synthetic transactions
-│   ├── seed_benchmarks.py         # Seed market benchmark pricing data
-│   └── teller_service.py          # Teller API client
-│
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx                # Main app, routing, view state management
-│   │   ├── main.tsx               # React entry point
-│   │   ├── components/
-│   │   │   ├── TellerConnect.tsx  # Teller Connect bank linking widget
-│   │   │   └── ...                # Dashboard, Transactions, Bargains, etc.
-│   │   ├── context/               # React context (Auth state)
-│   │   └── pages/                 # Page-level components
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── PLAN.md                        # Detailed technical design document
-└── README.md                      # This file
-```
+### CI/CD Pipeline
+- **Frontend Deployment**: Triggered by changes to `frontend/`. Builds the Vite app and syncs `.dist/` to S3, followed by a CloudFront invalidation.
+- **Backend Deployment**: Triggered by changes to `backend/`. Builds a Docker image, pushes it to AWS ECR, and uses SSH to pull and restart the containers on EC2.
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- **Node.js** v18+ and npm
-- **Python** 3.10+
-- A [Supabase](https://supabase.com) project (free tier)
-- A [Groq](https://console.groq.com) API key (free tier)
-- A [Teller.io](https://teller.io) account + app credentials (sandbox)
-
----
-
-### Backend Setup
-
-```bash
-# 1. Navigate to the backend directory
-cd backend
-
-# 2. Create and activate a virtual environment
-python -m venv venv
-
-# Windows
-.\venv\Scripts\activate
-
-# macOS / Linux
-source venv/bin/activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Configure environment variables (see below)
-cp .env.example .env
-
-# 5. Start the development server
-uvicorn main:app --reload
-```
-
-The API will be available at `http://localhost:8000`.  
-Interactive docs: `http://localhost:8000/docs`
-
----
-
-### Frontend Setup
-
-```bash
-# 1. Navigate to the frontend directory
-cd frontend
-
-# 2. Install dependencies
-npm install
-
-# 3. Configure environment variables (see below)
-cp .env.example .env
-
-# 4. Start the development server
-npm run dev
-```
-
-The frontend will be available at `http://localhost:5173`.
-
----
-
-### Environment Variables
-
-#### `backend/.env`
-
-| Variable                   | Description                                      |
-|----------------------------|--------------------------------------------------|
-| `SUPABASE_URL`             | Your Supabase project URL                        |
-| `SUPABASE_ANON_KEY`        | Supabase anonymous (public) key                  |
-| `SUPABASE_SERVICE_ROLE_KEY`| Supabase service role key (server-side only)     |
-| `GROQ_API_KEY`             | Groq Cloud API key for Llama 3 inference         |
-| `TELLER_APP_ID`            | Your Teller application ID                       |
-| `TELLER_CERT_PATH`         | Path to Teller mTLS certificate file             |
-| `TELLER_KEY_PATH`          | Path to Teller mTLS private key file             |
-
-#### `frontend/.env`
-
-| Variable                    | Description                              |
-|-----------------------------|------------------------------------------|
-| `VITE_SUPABASE_URL`         | Your Supabase project URL                |
-| `VITE_SUPABASE_ANON_KEY`    | Supabase anonymous (public) key          |
-| `VITE_TELLER_APP_ID`        | Your Teller application ID               |
-
-> ⚠️ **Never commit `.env` files to version control.** All secrets must be configured as environment variables in your hosting provider's dashboard for production.
-
----
-
-## API Reference
-
-### Health
-
-| Method | Endpoint   | Description             | Auth Required |
-|--------|------------|-------------------------|---------------|
-| GET    | `/`        | Root welcome message    | No            |
-| GET    | `/health`  | Health check            | No            |
-| GET    | `/me`      | Current authenticated user info | Yes   |
-
-### Teller
-
-| Method | Endpoint            | Description                          | Auth Required |
-|--------|---------------------|--------------------------------------|---------------|
-| POST   | `/api/teller/sync`  | Exchange Teller token and sync transactions | Yes    |
-
-### Subscriptions
-
-| Method | Endpoint                                    | Description                          | Auth Required |
-|--------|---------------------------------------------|--------------------------------------|---------------|
-| POST   | `/api/subscriptions/detect`                 | Run the detection pipeline           | Yes           |
-| GET    | `/api/subscriptions`                        | List all detected subscriptions      | Yes           |
-| POST   | `/api/subscriptions/{id}/generate-cancellation` | Generate AI cancellation email   | Yes           |
-
-### Bargains
-
-| Method | Endpoint          | Description                    | Auth Required |
-|--------|-------------------|--------------------------------|---------------|
-| GET    | `/api/bargains`   | List bargain alerts for user   | Yes           |
-
----
-
-## AI System Design
-
-### Subscription Classification Prompt
-
-```
-System: You are a financial transaction classifier.
-
-Given grouped transaction JSON:
-1. Determine if it is a recurring subscription.
-2. Normalize the service name.
-3. Categorize it.
-4. Return strictly valid JSON only — no explanation text.
-
-Required fields:
-- is_subscription (boolean)
-- normalized_name (string)
-- category (string)
-- confidence (float 0–1)
-```
-
-### Bargain Analysis Prompt
-
-```
-System: You are a cost optimization assistant.
-
-Given:
-- Subscription name
-- Current monthly cost
-- Benchmark pricing options
-
-Return strictly JSON:
-{
-  "original": "string",
-  "alternative": "string",
-  "monthly_savings": number
-}
-
-Return null if no savings exist.
-```
-
-**Key design decisions:**
-- **Heuristic pre-filter** reduces LLM calls and token usage significantly
-- **Strict JSON mode** enforced — no free-form text permitted in responses
-- **Groq** chosen for sub-second inference latency on free tier
-
----
-
-## Database Schema
-
-```sql
--- User profiles (synced from Supabase Auth)
-CREATE TABLE public.profiles (
-  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-  full_name TEXT,
-  avatar_url TEXT,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Bank transactions imported from Teller
-CREATE TABLE public.transactions (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id),
-  teller_transaction_id TEXT UNIQUE,
-  account_id TEXT,
-  name TEXT,
-  merchant_name TEXT,
-  amount DECIMAL(10,2),
-  date DATE,
-  category TEXT,
-  raw_json JSONB
-);
-
--- Detected subscriptions
-CREATE TABLE public.subscriptions (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id),
-  name TEXT NOT NULL,
-  amount DECIMAL(10,2),
-  frequency TEXT,
-  category TEXT,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Market pricing benchmarks
-CREATE TABLE public.market_benchmarks (
-  id SERIAL PRIMARY KEY,
-  service_name TEXT,
-  category TEXT,
-  tier_name TEXT,
-  monthly_price DECIMAL(10,2)
-);
-```
-
----
-
-## Security
-
-- **JWT verification** enforced on every protected backend route via `Depends(verify_token)`
-- **No real financial credentials stored** — Teller handles banking auth via their Connect widget
-- **Sandbox mode only** — no live financial data is used or stored
-- **CORS restricted** to known frontend origins
-- **All secrets** stored in environment variables — never hardcoded
-- **No sensitive data logged** anywhere in the application
-
----
-
-## Deployment
-
-### Frontend → Vercel
-
-```bash
-# Push to GitHub — Vercel auto-deploys on every push to main
-git push origin main
-```
-
-Set all `VITE_*` environment variables in the Vercel project dashboard.
-
-### Backend → Render
-
-- Connect your GitHub repository to a new Render Web Service
-- Set runtime to **Python**
-- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-- Set all environment variables in Render's dashboard
-
-> **Note:** Render free tier has a cold start of ~30 seconds after inactivity. This is expected and acceptable for a portfolio prototype.
-
-### Database → Supabase
-
-- All schema migrations are in `backend/db/`
-- Run them against your Supabase project using the SQL editor or the migration helper:
-  ```bash
-  python backend/apply_migration_helper.py
-  ```
-
----
-
-## Project Scope & Disclaimer
-
-This project is intentionally scoped as a **technical portfolio demonstration**.
-
-| What it does ✅ | What it does NOT do ❌ |
-|---|---|
-| Detects subscription patterns from transaction data | Store or transmit real banking credentials |
-| Uses Teller sandbox for safe bank linking demos | Scrape live pricing data from the web |
-| Generates AI-written cancellation emails | Execute real subscription cancellations |
-| Compares costs against static benchmark data | Provide regulated financial advice |
-| Demo mode for zero-friction recruiter review | Operate under PCI-DSS / fintech compliance |
-
----
-
-## Future Roadmap
-
-- [ ] Real-time webhook sync via Teller webhooks
-- [ ] Budget scoring dashboard with spending trend analysis
-- [ ] Multi-year savings projections
-- [ ] Multi-model AI comparison (GPT-4o vs Llama 3 vs Gemini)
-- [ ] Stripe subscription import integration
-- [ ] Usage analytics dashboard
-- [ ] Resend live email delivery for cancellation flow
-
----
-
-
+## 💻 Local Development
+
+1. **Backend**:
+   ```bash
+   cd backend
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   uvicorn main:app --reload
+   ```
+
+2. **Frontend**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
