@@ -1,112 +1,111 @@
-# ProjectSpara: Financial Intelligence & Savings Analyst
+# ProjectSpara: Autonomous Financial Intelligence & Analytical Lifecycle Management
 
-ProjectSpara is an AI-powered financial management platform designed to help users discover hidden subscriptions, research market benchmarks autonomously, and find cost-saving alternatives for their recurring expenses.
+[![Frontend](https://img.shields.io/badge/Frontend-React%20%2F%20Vite-blue)](https://vitejs.dev/)
+[![Backend](https://img.shields.io/badge/Backend-FastAPI-green)](https://fastapi.tiangolo.com/)
+[![Database](https://img.shields.io/badge/Database-Supabase%20%2F%20Postgres-blueviolet)](https://supabase.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![Deployment](https://img.shields.io/badge/Deployment-AWS%20CloudFront%2FS3-orange)](https://d3jv0c4kc01n7n.cloudfront.net/)
 
-website link: d3jv0c4kc01n7n.cloudfront.net
+ProjectSpara is an advanced analytical platform designed for automated subscription lifecycle management and intelligent budget regulation. Utilizing Large Language Models (LLM) for pattern recognition and autonomous market research, it transforms raw transaction data into actionable financial guardrails.
 
-## 🏗️ Technical Architecture
-
-### Service Interaction Flow
-The following diagram illustrates how the frontend, backend, and AI components interact across the AWS infrastructure.
-
-```mermaid
-graph TD
-    User((User)) -->|HTTPS| CF[CloudFront]
-    CF -->|Default| S3[S3 Frontend Bucket]
-    CF -->|/api/*| EC2[EC2 Backend Proxy]
-    
-    subgraph "AWS Ecosystem"
-        EC2 -->|Docker Proxy| FastAPI[FastAPI App]
-        FastAPI -->|Store/Retrieve| Supabase[(Supabase DB)]
-        FastAPI -->|Analyze| Groq[Groq AI / Llama 3.3]
-        FastAPI -->|Sync| Teller[Teller API]
-    end
-    
-    subgraph "AI Core Logic"
-        FastAPI --> Detector[Subscription Detector]
-        FastAPI --> KM[Knowledge Manager]
-        KM --> BH[Bargain Hunter]
-    end
-```
-
-### **Detailed Component Interactions**
-
-1.  **Request Routing**: All traffic enters via **CloudFront**.
-    *   **Frontend**: Requests for static assets (HTML/JS/CSS) are served directly from the **S3 Bucket**.
-    *   **Backend**: Requests matching `/api/*` are forwarded to the **EC2 Backend Origin**, where an **Nginx** reverse proxy routes it to the **FastAPI** container.
-2.  **Autonomous Research (KM)**: When the **Bargain Hunter** detects a subscription in a new category, it triggers the **Knowledge Manager**. The KM uses **Groq AI** to research the market and saves fresh competitors/prices into the **Supabase** `market_benchmarks` table.
-3.  **Savings Discovery (BH)**: The **Bargain Hunter** performs a cross-reference between your personal subscriptions and the AI-curated benchmarks in Supabase. It uses LLM logic to determine if a cheaper service is a "valid logical substitute" before presenting it to you.
-4.  **Bank Synchronization (Teller)**: The backend securely communicates with the **Teller API** using mTLS certificates to pull real-time transaction data, which the **Detector** then analyzes to find your recurring payments.
-
-## 🚀 Key Features
-
-### 1. Subscription Detector
-Uses **Llama 3.3** to analyze bank transaction patterns. It groups similar merchants, filters candidates with recurring dates, and uses AI to normalize names and categories (e.g., identifying "AMZN MKTP" as "Amazon Prime").
-
-### 2. Autonomous Knowledge Manager
-A background research engine that populates a "Market Benchmark" database. If a user has a subscription in a category that lacks data, the Knowledge Manager autonomously researches competitors and free alternatives across the web.
-
-### 3. Bargain Hunter
-Compares your active subscriptions against the AI-populated knowledge base. It provides personalized saving reports, such as suggesting "DaVinci Resolve" as a free alternative to "Adobe Premiere".
-
-### 4. Supabase Keep-Alive
-A specialized health-check system that pings the Supabase database during deployments and monitoring checks. This prevents the Supabase free-tier project from pausing due to inactivity.
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Vite, React, Tailwind CSS, Lucide Icons, Recharts.
-- **Backend**: FastAPI, Uvicorn, Docker, Nginx (Reverse Proxy).
-- **Database**: Supabase (PostgreSQL).
-- **AI/LLM**: Groq SDK (Llama 3.3 70B Versatile).
-- **Infrastructure**: Terraform, AWS (S3, CloudFront, EC2, ECR).
-
-## 📦 Deployment Details
-
-### Infrastructure Setup (Terraform)
-The infrastructure is managed via Terraform in the `terraform/` directory.
-
-1. **Initialize & Apply**:
-   ```bash
-   cd terraform
-   terraform init
-   terraform apply
-   ```
-2. **Key Outputs**: Terraform will provide the `ec2_public_ip`, `cloudfront_domain_name`, and `s3_bucket_name`. These are required for the next steps.
-
-### Environment Variable Mapping
-Ensure these secrets are configured in your **GitHub Repository Settings > Secrets and variables > Actions**:
-
-| Secret Key | Description |
-| :--- | :--- |
-| `AWS_ACCESS_KEY_ID` | AWS Credentials for Terraform and S3 Sync. |
-| `AWS_SECRET_ACCESS_KEY` | AWS Credentials. |
-| `EC2_HOST` | The public IP of your backend instance (output from Terraform). |
-| `EC2_SSH_KEY` | Your private SSH key for deployment access. |
-| `SUPABASE_URL` | Your Supabase project URL. |
-| `SUPABASE_SERVICE_ROLE_KEY` | High-privilege key for backend database operations. |
-| `GROQ_API_KEY` | API key for LLM analysis. |
-| `VITE_API_URL` | Should point to your CloudFront domain (e.g., `https://dxxxxx.cloudfront.net`). |
-
-### CI/CD Pipeline
-- **Frontend Deployment**: Triggered by changes to `frontend/`. Builds the Vite app and syncs `.dist/` to S3, followed by a CloudFront invalidation.
-- **Backend Deployment**: Triggered by changes to `backend/`. Builds a Docker image, pushes it to AWS ECR, and uses SSH to pull and restart the containers on EC2.
+Live Deployment: [https://d3jv0c4kc01n7n.cloudfront.net/](https://d3jv0c4kc01n7n.cloudfront.net/)
 
 ---
 
-## 💻 Local Development
+## Technical Architecture
 
-1. **Backend**:
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   uvicorn main:app --reload
-   ```
+The platform architecture is designed for high availability and secure data synchronization. It leverages mTLS for financial data ingestion and a multi-layered analytical pipeline for expenditure classification.
 
-2. **Frontend**:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+```mermaid
+graph TD
+    User -->|HTTPS| CF[AWS CloudFront]
+    CF -->|Static Assets| S3[AWS S3 Bucket]
+    CF -->|API Gateway| Bck[EC2 / Docker]
+    
+    subgraph "Internal Processing"
+        Bck -->|Detection| LLM[Groq / Llama 3.3]
+        Bck -->|Auth / State| DB[(Supabase SQL)]
+        Bck -->|Sync| Teller[Teller mTLS]
+    end
+    
+    subgraph "Analytical Engine"
+        LLM --> PM[Projection Manager]
+        LLM --> BM[Benchmark Engine]
+    end
+```
+
+---
+
+## Core Capabilities
+
+### 1. Subscription Lifecycle Intelligence
+ProjectSpara implements a heuristic detection engine that identifies recurring billing patterns across diversified transaction histories.
+- Automated Detection: LLM-based categorization and merchant normalization (e.g., mapping complex merchant strings to canonical brand identities).
+- Predictive Projections: Dynamic calculation of next-billing timestamps using historical frequency analysis and lookahead logic.
+
+![Subscription Calendar](docs/assets/calendar.png)
+
+### 2. Guardrail-Based Budgeting
+The platform provides a real-time spending regulation module that compares detected recurring liabilities against user-defined thresholds.
+- Dynamic Progress Tracking: Real-time aggregation of monthly liabilities.
+- Visual Variance Analysis: Color-coded budget integrity indicators (Safe, Warning, Critical).
+- Inline Preference Management: Decoupled update logic for rapid guardrail adjustment.
+
+![Budget Analysis](docs/assets/dashboard.png)
+
+### 3. Autonomous Market Research (Knowledge Manager)
+A proprietary background service that populates market benchmarks without user intervention.
+- Category Crawling: When new categories are detected, the system researched market-leading competitors and pricing tiers.
+- Logical Substitutions: The AI identifies functional alternatives for high-cost subscriptions (e.g., suggesting open-source or free alternatives based on user utility).
+
+---
+
+## Technology Stack
+
+- Frontend: React 19, TypeScript, Tailwind CSS (Vite build engine).
+- Backend: FastAPI (Python 3.12+), Uvicorn ASGI.
+- Data Architecture: PostgreSQL (Supabase) with Row-Level Security (RLS).
+- AI Architecture: Groq Cloud (Llama 3.3 70B Versatile).
+- Infrastructure: Terraform (IaC), AWS S3, CloudFront, ECR, EC2.
+
+---
+
+## Local Development Environment
+
+### Prerequisites
+- Python 3.12+
+- Node.js 20+
+- Supabase Project Credentials
+
+### Backend Initialization
+```bash
+cd backend
+python -m venv venv
+# Windows
+.\venv\Scripts\activate
+# Unix
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+### Frontend Initialization
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## Security and Compliance
+
+- Data Isolation: Row-Level Security (RLS) is strictly enforced on all database interactions.
+- Credential Security: API keys and mTLS certificates are managed via encrypted environment variables.
+- Connectivity: All financial data synchronization is performed over encrypted tunnels with industry-standard authentication.
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
