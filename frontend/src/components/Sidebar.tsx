@@ -4,7 +4,8 @@ import {
     PiggyBank,
     Settings,
     LogOut,
-    Menu
+    Menu,
+    CalendarDays
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -20,6 +21,7 @@ export default function Sidebar({ userEmail, onSignOut, activeTab, onTabChange }
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'calendar', label: 'Calendar', icon: CalendarDays },
         { id: 'transactions', label: 'Transactions', icon: CreditCard },
         { id: 'savings', label: 'Savings', icon: PiggyBank },
         { id: 'settings', label: 'Settings', icon: Settings },

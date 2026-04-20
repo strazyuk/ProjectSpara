@@ -6,7 +6,7 @@ import os
 load_dotenv()
 
 from auth import verify_token
-from routers import teller, subscriptions, bargains
+from routers import teller, subscriptions, bargains, preferences
 from supabase import create_client, Client
 
 # Initialize Supabase client for health checks
@@ -40,6 +40,7 @@ app.add_middleware(
 app.include_router(teller.router, prefix="/api/teller")
 app.include_router(subscriptions.router, prefix="/api/subscriptions")
 app.include_router(bargains.router, prefix="/api/bargains")
+app.include_router(preferences.router, prefix="/api/preferences")
 
 @app.get("/api")
 def read_root():

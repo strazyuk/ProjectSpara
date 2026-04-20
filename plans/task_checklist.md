@@ -1,0 +1,12 @@
+- `[x]` Create `/plans` directory
+- `[x]` Migrate root plans (`PLAN.md`, `v2Feature.md`) to `/plans`
+- `[x]` Copy brain artifacts to `/plans`
+  - `feature_analysis.md`
+  - `implementation_plan.md`
+  - `walkthrough.md`
+- `[x]` Reconfigure `.gitignore`
+  - Clean up absolute paths and redundant ignores
+  - Allow `.md` files in `/plans`
+  - Group sections (Node.js, Python, Terraform, etc.)
+- `[x]` Delete temporary debug files (`secrets_check.txt`, etc.)
+- `[x]` Verify git status and ignore rules

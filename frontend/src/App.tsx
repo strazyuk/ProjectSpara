@@ -8,6 +8,8 @@ import BargainList from './components/BargainList';
 import Sidebar from './components/Sidebar';
 import SpendingTrend from './components/charts/SpendingTrend';
 import CategoryPie from './components/charts/CategoryPie';
+import BudgetTracker from './components/BudgetTracker';
+import SubscriptionCalendar from './components/SubscriptionCalendar';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from './lib/supabase';
 import type { TimeRange } from './types';
@@ -22,10 +24,22 @@ interface Transaction {
   category: string;
 }
 
+interface Subscription {
+  id: string;
+  name: string;
+  amount: number;
+  frequency: string;
+  category: string;
+  merchant_name: string;
+  next_billing_date: string;
+}
+
 function Dashboard() {
   const { user, session, signOut } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
+  const [subsLoading, setSubsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [timeRange, setTimeRange] = useState<TimeRange>('6M');
 
@@ -39,6 +53,24 @@ function Dashboard() {
     if (error) console.error('Error fetching transactions:', error);
     else setTransactions(data || []);
     setLoading(false);
+  };
+
+  const fetchSubscriptions = async () => {
+    if (!session?.access_token) return;
+    setSubsLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/subscriptions/`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      const data = await response.json();
+      setSubscriptions(data || []);
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+    } finally {
+      setSubsLoading(false);
+    }
   };
 
   const handleTellerSuccess = async (accessToken: string) => {
@@ -55,6 +87,7 @@ function Dashboard() {
       const data = await response.json();
       console.log('Sync result:', data);
       fetchTransactions();
+      fetchSubscriptions();
     } catch (error) {
       console.error('Error syncing Teller transactions:', error);
     }
@@ -62,7 +95,8 @@ function Dashboard() {
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+    if (session) fetchSubscriptions();
+  }, [session]);
 
   const filteredTransactions = useMemo(() => {
     if (!transactions.length) return [];
@@ -104,14 +138,17 @@ function Dashboard() {
                   Good morning, {user?.email?.split('@')[0]}
                 </p>
                 <h1 className="text-3xl font-bold tracking-tight text-black">
-                  {activeTab === 'dashboard' ? 'My balance' : 'Transactions'}
+                  {activeTab === 'dashboard' ? 'My balance' : activeTab === 'calendar' ? 'Bill Calendar' : 'Transactions'}
                 </h1>
               </div>
               <div className="flex items-center gap-4">
                 <TellerConnect onSuccess={handleTellerSuccess} />
                 <button
-                  onClick={fetchTransactions}
-                  disabled={loading}
+                  onClick={() => {
+                    fetchTransactions();
+                    fetchSubscriptions();
+                  }}
+                  disabled={loading || subsLoading}
                   className="p-2.5 bg-white text-gray-400 rounded-full hover:text-black hover:bg-gray-50 transition-all disabled:animate-spin shadow-sm border border-gray-100"
                   title="Refresh Data"
                 >
@@ -169,11 +206,25 @@ function Dashboard() {
                 </div>
 
                 {/* Lists Row */}
+                {/* Lists Row */}
                 <div className="flex flex-col gap-6">
+                  <BudgetTracker totalSubSpend={subscriptions.reduce((acc, curr) => acc + curr.amount, 0)} />
                   <BargainList />
-                  <SubscriptionList />
+                  <SubscriptionList 
+                    subscriptions={subscriptions} 
+                    loading={subsLoading} 
+                    onRefresh={fetchSubscriptions} 
+                  />
                 </div>
               </>
+            )}
+
+            {/* ===================== CALENDAR TAB ===================== */}
+            {activeTab === 'calendar' && (
+              <SubscriptionCalendar 
+                subscriptions={subscriptions} 
+                loading={subsLoading} 
+              />
             )}
 
             {/* ===================== TRANSACTIONS TAB ===================== */}

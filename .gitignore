@@ -34,8 +34,6 @@ bin/
 lib/
 share/
 .python-version
-backend/seed_benchmarks.py
-backend/seed_data.py
 
 # --- Terraform ---
 .terraform/
@@ -50,7 +48,10 @@ _override.tf
 _override.tf.json
 .terraform.lock.hcl
 
+# --- Documentation & Metadata ---
+# We keep implementation plans and checklists in the repo.
+!plans/*.md
+
 # --- Artifacts & Temporary ---
-PLAN.md
 tmp/
 C:/Users/asira/.gemini/antigravity/brain/*

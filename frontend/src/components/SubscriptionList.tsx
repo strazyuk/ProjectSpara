@@ -14,35 +14,22 @@ interface Subscription {
     next_billing_date?: string;
 }
 
-export default function SubscriptionList() {
+interface SubscriptionListProps {
+    subscriptions: Subscription[];
+    loading: boolean;
+    onRefresh: () => void;
+}
+
+export default function SubscriptionList({ subscriptions, loading, onRefresh }: SubscriptionListProps) {
     const { session } = useAuth();
-    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-    const [loading, setLoading] = useState(false);
     const [detecting, setDetecting] = useState(false);
 
-    const fetchSubscriptions = async () => {
-        if (!session?.access_token) return;
-        setLoading(true);
-        try {
-            const response = await fetch(`${API_URL}/api/subscriptions/`, {
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`,
-                },
-            });
-            const data = await response.json();
-            setSubscriptions(data || []);
-        } catch (error) {
-            console.error('Error fetching subscriptions:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleDetect = async () => {
         if (!session?.access_token) return;
         setDetecting(true);
         try {
-            const response = await fetch(`${API_URL}/api/subscriptions/detect`, {
+            const response = await fetch(`${API_URL}/subscriptions/detect`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`,
@@ -50,7 +37,7 @@ export default function SubscriptionList() {
             });
             const result = await response.json();
             console.log('Detection result:', result);
-            await fetchSubscriptions(); // Refresh list
+            onRefresh(); // Refresh parent list
         } catch (error) {
             console.error('Error detecting subscriptions:', error);
         } finally {
@@ -58,9 +45,6 @@ export default function SubscriptionList() {
         }
     };
 
-    useEffect(() => {
-        fetchSubscriptions();
-    }, [session]);
 
     return (
         <div className="bg-white p-10 rounded-[40px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100/50 h-full flex flex-col">

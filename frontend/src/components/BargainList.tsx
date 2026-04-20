@@ -25,8 +25,8 @@ export default function BargainList() {
         try {
             // Add ?refresh=true query param if forcing refresh
             const url = forceRefresh
-                ? `${API_URL}/api/bargains/?refresh=true`
-                : `${API_URL}/api/bargains/`;
+                ? `${API_URL}/bargains/?refresh=true`
+                : `${API_URL}/bargains/`;
 
             const response = await fetch(url, {
                 headers: {
